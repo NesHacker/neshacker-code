@@ -1,47 +1,49 @@
+const vscode = require('vscode');
 const { Assembler } = require('@neshacker/6502-tools')
 
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode');
-
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+/**
+ * Command: neshacker-code.assemble.
+ *
+ * Attempts to assemble 6502 text in the current editor window, convert it to
+ * hexadecimal text, and copy it to the clipboard. This command is useful for
+ * quickly assembling code to paste into a ROM via a hex editor.
+ */
+async function assembleAndCopyCommand () {
+	try {
+    const editor = vscode.window.activeTextEditor
+    if (!editor) {
+      return
+    }
+    const { document, selection } = editor
+    const text = selection.isEmpty ?
+      document.getText() :
+      document.getText(selection)
+		const result = Assembler.toHexString(text)
+		await vscode.env.clipboard.writeText(result)
+		const bytes = result.length / 2
+		vscode.window.setStatusBarMessage(
+			`NesHacker: Copied ${bytes} bytes of hexadecimal to clipboard.`,
+		)
+	} catch (err) {
+		vscode.window.showErrorMessage(err.message)
+	}
+}
 
 /**
+ * Handles activation for the neshacker-code module.
  * @param {vscode.ExtensionContext} context
  */
-function activate(context) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	// console.log('Congratulations, your extension "neshacker-code" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('neshacker-code.assemble', async function () {
-		const editor = vscode.window.activeTextEditor;
-		if (editor) {
-			let document = editor.document;
-			const documentText = document.getText();
-			console.log(documentText)
-
-			try {
-				const result = Assembler.toHexString(documentText)
-				await vscode.env.clipboard.writeText(result)
-				vscode.window.showInformationMessage('NesHacker: Assembled Hexadecimal Copied to Clipboard');
-			} catch (err) {
-				vscode.window.showErrorMessage(err.message)
-			}
-		}
-	});
-
-	context.subscriptions.push(disposable);
+function activate (context) {
+	context.subscriptions.push(vscode.commands.registerCommand(
+		'neshacker-code.assembleAndCopy',
+		assembleAndCopyCommand
+	))
 }
 
-// this method is called when your extension is deactivated
-function deactivate() {}
-
-module.exports = {
-	activate,
-	deactivate
+/**
+ * Handles deactivation for the neshacker-code module.
+ */
+function deactivate() {
 }
+
+module.exports = { activate, deactivate }
