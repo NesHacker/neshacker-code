@@ -1,5 +1,5 @@
 # NesHacker
-Commands & tools for NES game and ROM hack development.
+NES Development Utilities for VS Code.
 
 ## Features
 

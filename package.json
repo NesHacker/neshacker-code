@@ -13,6 +13,11 @@
     "onCommand:neshacker-code.assembleAndCopy"
   ],
   "main": "./extension.js",
+  "publisher": "NESGameCreationTools",
+  "repository": {
+    "url": "https://github.com/NesHacker/neshacker-code"
+  },
+  "icon": "./icon.png",
   "contributes": {
     "commands": [
       {
